@@ -14,8 +14,6 @@ def get_teachers(institution, initial_url):
 
     f = open(institution + "_teachers_urls.txt", "a")
 
-    time.sleep(150)
-
     try:
         while True:
             e = browser.find_elements_by_class_name('gs_btnPR')
