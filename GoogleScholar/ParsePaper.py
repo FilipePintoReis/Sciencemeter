@@ -1,8 +1,10 @@
-from Paper import Paper
+from GoogleScholar.Paper import Paper
 from bs4 import BeautifulSoup
+import time
 
-def parse(soup):
-    name = soup.find(id = "gsc_vcd_title").contents[0].contents[0]
+def parse(soup, name):
+    time.sleep(1)
+    authors = 'None'
     total_citations = 0
     publication_date = 'N/a'
     elements = soup.find_all(class_="gs_scl")
