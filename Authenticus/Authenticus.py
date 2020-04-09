@@ -4,7 +4,7 @@ import random
 from selenium import webdriver
 import requests
 
-from Paper import Paper
+from Authenticus.Paper import Paper
 
 
 def get_paper_links(url):
@@ -54,7 +54,7 @@ def get_paper_links(url):
                         aid = ul[i+1].contents[0]['id']
                         break
 
-            time.sleep(1)
+            time.sleep(2)
             if not flag:
                 browser.find_element_by_id(aid).click()
             else:
@@ -63,9 +63,9 @@ def get_paper_links(url):
     except Exception as err:
         print(f'Error occurred: {err}')
         time.sleep(3)
-        browser.close()
+        browser.quit()
 
-    browser.close()
+    browser.quit()
     return links
 
 
@@ -116,4 +116,4 @@ def parse_profile(url):
     return papers
 
 
-print(parse_profile("https://www.authenticus.pt/en/profileOfResearchers/publicationsList/16105?total_results=162&page=1&_=1"))
+#print(parse_profile("https://www.authenticus.pt/en/profileOfResearchers/publicationsList/16105?total_results=162&page=1&_=1"))
