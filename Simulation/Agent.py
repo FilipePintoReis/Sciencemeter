@@ -1,21 +1,25 @@
-from random import choice
+from random import choice, sample
 
 from Paper import Paper
 
 class Agent:
-    def __init__(self, id, name, free_hours, fields):
+    def __init__(self, id, name, free_hours, fields, simulation):
         self.id = id
         self.name = name
-        self.total_free_hours = free_hours
         self.free_hours = free_hours
         self.fields = fields
-        self.papers = {}
-        self.finished_papers = {}
+        self.papers = {} # Key = id ; Value = [ownership, field, paper]
+        self.finished_papers = {} # Key = id ; Value = [ownership, field, paper]
+        self.simulation = simulation
+        
+        self.number_authors_p_map = {0:1, 1:1, 2:1, 3:1}
+        self.paper_p_map = {}
+        self.agent_p_map = {}
 
-        self.field_p_map = {field: 1 for field in fields}
-
-    def reset_hours(self):
-        self.free_hours = self.total_free_hours
+    def initialize_agent_p_map(self):
+        for agent in self.simulation.dictionary.values():
+            if agent.id != self.id:
+                self.agent_p_map[agent.id] = 1
 
     def add_paper(self, id, ownership, field, paper):
         '''
@@ -27,64 +31,113 @@ class Agent:
         :param paper: Paper object
         '''
         self.papers[id] = [ownership, field, paper]
+        self.paper_p_map[id] = 1
         
     def create_paper(self, field):
         paper = Paper(field, self.id)
         self.add_paper(paper.id, True, field, paper)
 
-        return paper
+        return (paper) #, other_authors)
+
+    def choose_paper(self):
+        '''
+        Chooses a paper based on paper_p_map
+        '''
+        papers = [paper_id for paper_id, value in self.paper_p_map.items() for i in range(value)]
+
+
+        return None if len(papers) == 0 else choice(papers)
+
+    def choose_author(self): # tenho de passar o field
+        '''
+        Chooses an author based on agent_p_map
+        '''
+        teachers = [teacher_id for teacher_id, value in self.agent_p_map.items() for i in range(value)]
+        
+        return None if len(teachers) == 0 else choice(teachers)
+
+
+    def choose_authors(self, number):
+        '''
+        Chooses number authors based on agent_p_map
+        '''
+
+        teachers = [teacher_id for teacher_id, value in self.agent_p_map.items() for i in range(value)]
+
+        try:
+            i = number
+            return None if len(teachers) == 0 else sample(teachers, number)
+        
+        except Exception as e:
+            if number > 0:
+                self.choose_authors(number - 1)
+            else:
+                return None
     
-    def choose_a_paper(self):
+    def number_of_coauthors(self):
         '''
-        Chooses a field based on the field_p_map.
-        Chooses one of the papers the teacher has on that field.
+        Chooses number co-author based on number_authors_p_map
         '''
-        field_array = [field for field, number in self.field_p_map.items() for _ in range(number)]
-        list_of_current_fields = [field[1] for field in self.papers.values()]
-
-        field_array = list(filter(lambda x: x in list_of_current_fields, field_array))
-
-        field = choice(field_array)
-
-        papers_on_that_field = [paper_id for paper_id, l in self.papers.items() if l[1] == field]
-        return choice(papers_on_that_field)
+        numbers = [number for number, value in self.paper_p_map.items() for i in range(value)]
+        
+        return None if len(numbers) == 0 else choice(numbers)
 
     def check_if_papers_finished(self):
+        finished_papers = []
         for paper_id, paper in self.papers.items():
             if paper[2].days_left <= 0:
-                self.finish_paper(paper_id)
+                finished_papers.append(paper_id)
+
+        return finished_papers
+
 
     def finish_paper(self, paper_id):
         self.finished_papers[paper_id] = self.papers[paper_id]
         del self.papers[paper_id]
+        self.paper_p_map[paper_id] = 0
 
     def decrement_papers_days(self):
         for paper in self.papers.values():
             if paper[0]:
                 paper[2].decrement_days()
     
-    def act_day(self): ## TODO para cada agente, criar uma probabilidade
+    def act_day(self):
         '''
         '''
-        # Decide se cria paper ou não
+
+        # Decide se cria paper ou não ## TODO make it better.
+        if len(self.papers) < 10:
+            self.create_paper(choice(self.fields))
+
         # Se sim, se adiciona autores ou não
+        print('Authors:', self.choose_authors(1000))
+        
+
+        # Checkar se os papers acabaram
+        finished_papers = self.check_if_papers_finished()
+        
+        # if finished_papers is not None and len(finished_papers) > 0: print(finished_papers)
+
+        for paper in finished_papers:
+            self.finish_paper(paper)
 
         # Para cada hora livre
             # Escolher paper para trabalhar.
             # Gastar essa hora no paper.
+        for hour in range(self.free_hours):
+            paper_id = self.choose_paper()
+            if paper_id is not None:
+                self.papers[paper_id][2].increment_hours(1)
+                #print(self.papers[paper_id][2])
 
+       
 
-        self.check_if_papers_finished()
-
+        # Decrementar os dias de um paper
         self.decrement_papers_days()
 
-        self.reset_hours()
-
-        print('Working')
+        #print(self.free_hours)
 
     def __repr__(self):
-        return self.name
-
-
-
+        return str(self.id)
+        
 # print(a.create_paper('math'))
