@@ -12,7 +12,7 @@ class Agent:
         self.finished_papers = {} # Key = id ; Value = [ownership, field, paper]
         self.simulation = simulation
         
-        self.number_authors_p_map = {0:1, 1:1, 2:1, 3:1}
+        self.number_authors_p_map = {0:1, 1:1, 2:1}
         self.paper_p_map = {}
         self.agent_p_map = {}
 
@@ -34,10 +34,20 @@ class Agent:
         self.paper_p_map[id] = 1
         
     def create_paper(self, field):
+        '''
+        Creates a paper in the given field.
+
+        :param field: string field of new paper
+        :return: tuple with the paper object and other authors
+        '''
         paper = Paper(field, self.id)
         self.add_paper(paper.id, True, field, paper)
 
-        return (paper) #, other_authors)
+        other_authors = self.choose_authors(self.number_of_coauthors(), field)
+
+        for author in other_authors:
+            self.simulation.dictionary[author].add_paper(paper.id, False, field, paper)
+
 
     def choose_paper(self):
         '''
@@ -48,39 +58,26 @@ class Agent:
 
         return None if len(papers) == 0 else choice(papers)
 
-    def choose_author(self): # tenho de passar o field
-        '''
-        Chooses an author based on agent_p_map
-        '''
-        teachers = [teacher_id for teacher_id, value in self.agent_p_map.items() for i in range(value)]
-        
-        return None if len(teachers) == 0 else choice(teachers)
-
-
-    def choose_authors(self, number):
+    def choose_authors(self, number, field):
         '''
         Chooses number authors based on agent_p_map
         '''
-
-        teachers = [teacher_id for teacher_id, value in self.agent_p_map.items() for i in range(value)]
+        teachers = [teacher_id for teacher_id, value in self.agent_p_map.items() for i in range(value) if field in self.simulation.dictionary[teacher_id].fields]
 
         try:
-            i = number
-            return None if len(teachers) == 0 else sample(teachers, number)
+            return self.choose_authors(number - 1, field) if len(teachers) < number else sample(teachers, number)
         
         except Exception as e:
-            if number > 0:
-                self.choose_authors(number - 1)
-            else:
-                return None
+            print('Exception occurred:', e)
+            return None
     
     def number_of_coauthors(self):
         '''
         Chooses number co-author based on number_authors_p_map
         '''
-        numbers = [number for number, value in self.paper_p_map.items() for i in range(value)]
-        
-        return None if len(numbers) == 0 else choice(numbers)
+        numbers = [number for number, value in self.number_authors_p_map.items() for i in range(value)]
+
+        return choice(numbers)
 
     def check_if_papers_finished(self):
         finished_papers = []
@@ -110,7 +107,7 @@ class Agent:
             self.create_paper(choice(self.fields))
 
         # Se sim, se adiciona autores ou não
-        print('Authors:', self.choose_authors(1000))
+        #print('Authors:', self.choose_authors(2))
         
 
         # Checkar se os papers acabaram

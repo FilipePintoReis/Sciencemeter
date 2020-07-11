@@ -14,7 +14,7 @@ def randomString(stringLength = 8):
 
 class Simulation:
     def __init__(self, number_of_teachers, simulation_days):
-        self.dictionary = {}
+        self.dictionary = {}  # K -> Agent ID || V -> Agent class 
         self.populate(number_of_teachers)
         self.number_of_teachers = number_of_teachers
         self.initialize_agents_maps()
@@ -140,7 +140,7 @@ class Simulation:
         #self.print_agents()
 
 
-simul = Simulation(5, 300)
+simul = Simulation(5, 900)
 
 simul.simulation()
 

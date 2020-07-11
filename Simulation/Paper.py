@@ -13,7 +13,7 @@ class Paper:
 
         start_hour = 15
 
-        self.hour_mapping = {i:start_hour + int(1.6**i) for i in range(1,11)}
+        self.hour_mapping = {i:start_hour + int(1.8**i) for i in range(1,11)}
         self.paper_level = 0
 
         
