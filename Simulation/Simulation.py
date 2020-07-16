@@ -21,6 +21,7 @@ class Simulation:
         self.initialize_agents_maps()
         self.simulation_days = simulation_days
         self.completed_papers = 0
+        self.number_of_coauthors = {0: 0, 1: 0, 2: 0}
         self.papers_per_field = {}
         self.directives = directives
 
@@ -43,7 +44,7 @@ class Simulation:
         ret += "-                                   -\n"
         ret += "- " + "Número de professores: " + str(self.number_of_teachers)  + "         -\n"
         ret += "- " + "Dias de Simulação: " + str(self.simulation_days)  + "             -\n"
-        ret += "- " + "Número de papers completo: " + str(self.completed_papers)  + "        -\n"
+        ret += "- " + "Número de papers completo: " + str(self.completed_papers)  + "        -\n\n"
         ret += "- " + "Paper's por nível:           -\n"
         ret += "-    " + "P1: " + str(self.papers_p1)  + "                     -\n"
         ret += "-    " + "P2: " + str(self.papers_p2)  + "                     -\n"
@@ -56,7 +57,9 @@ class Simulation:
         ret += "-    " + "P9: " + str(self.papers_p9)  + "                     -\n"
         ret += "-    " + "P10: "+ str(self.papers_p10)  + "                    -\n\n"
 
-        ret += "Papers per field: " + str(self.papers_per_field) + "\n"
+        ret += "Papers per field: " + str(self.papers_per_field) + "\n\n"
+
+        ret += "Co-authors " + str(self.number_of_coauthors)  + "\n"
 
         return ret
     
@@ -68,6 +71,9 @@ class Simulation:
                 if paper[2].owner == agent.id:
                     self.update_papers(paper_level)
                     self.completed_papers += 1
+
+                    self.number_of_coauthors[len(paper[2].authors) - 1] += 1
+
 
                 if paper[2].field in self.papers_per_field:
                     self.papers_per_field[paper[2].field] += 1
@@ -140,11 +146,11 @@ class Simulation:
             print('Other agents')
             print(agent.agent_p_map)
 
-    # Max numero de papers possivel
+    # Maximize number of papers.
     def directive_amount_of_papers(self, delta, agent):
         agent.d_p_number += delta
 
-    # Max numero de papers level
+    # Maximize number of papers from a given level.
     def directive_papers_per_level(self, paper, level, agent):
         if paper is not None:
             if agent.papers[paper][2].paper_level < level:
@@ -154,7 +160,7 @@ class Simulation:
                 if agent.papers[paper][2].id in agent.paper_p_map:
                     agent.paper_p_map[agent.papers[paper][2].id] -= 5
 
-    # Max n papers from a field
+    # Maximize number of papers from a given field.
     def directive_papers_per_field(self, field, agent):
         if 'field' in agent.day_actions:
             for f in agent.day_actions['field']:
@@ -164,20 +170,16 @@ class Simulation:
     # Maximize number of co-authors
     def directive_number_coauthors(self, agent):
         if 'agent' in agent.day_actions:
-            for a in agent.day_actions['agent']:
-                agent.number_authors_p_map[a] += a
+            agent.number_authors_p_map[len(agent.day_actions['agent'])] += len(agent.day_actions['agent'])
 
 
     def simulation(self):
-        for agent in self.dictionary.values():
-            agent.create_paper(choice(agent.fields))
-
         for i in range(self.simulation_days):
             for agent in self.dictionary.values():
                 agent.act_day()
 
 
-simul = Simulation(10, 1000, {'delta' : 0.1, 'level': 10})
+simul = Simulation(20, 1000, {'agent' : 0.1, 'level': 10})
 
 simul.simulation()
 

@@ -44,6 +44,9 @@ class Agent:
         :param paper: Paper object
         '''
         self.papers[id] = [ownership, field, paper]
+
+        paper.add_author(self.id)
+
         self.paper_p_map[id] = 1
         
     def create_paper(self, field):
@@ -61,10 +64,10 @@ class Agent:
         for author in other_authors:
             self.simulation.dictionary[author].add_paper(paper.id, False, field, paper)
 
-            if 'agents' in self.day_actions:
-                self.day_actions['agents'].append(author)
+            if 'agent' in self.day_actions:
+                self.day_actions['agent'].append(author)
             else:
-                self.day_actions['agents'] = [author]
+                self.day_actions['agent'] = [author]
 
     def choose_paper(self):
         '''
@@ -87,12 +90,7 @@ class Agent:
         '''
         teachers = [teacher_id for teacher_id, value in self.agent_p_map.items() for i in range(value) if field in self.simulation.dictionary[teacher_id].fields]
 
-        try:
-            return self.choose_authors(number - 1, field) if len(teachers) < number else sample(teachers, number)
-        
-        except Exception as e:
-            print('Exception occurred:', e)
-            return None
+        return sample(teachers, number)
     
     def number_of_coauthors(self):
         '''
@@ -161,6 +159,9 @@ class Agent:
 
             if key == 'agent':
                 if 'agent' in self.day_actions:
+                    for _ in self.day_actions['agent']:
+                        self.simulation.directive_number_coauthors(self)
+
 
     def act_day(self):
         '''

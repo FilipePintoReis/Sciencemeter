@@ -5,7 +5,7 @@ class Paper:
     def __init__(self, field, owner):
         self.id = 'Title' + str(uuid4())
         self.owner = owner
-        self.authors = [owner]
+        self.authors = []
         self.field = field
         self.total_citations = 0
         self.worked_hours = 0
