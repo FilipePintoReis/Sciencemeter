@@ -9,7 +9,7 @@ class Paper:
         self.field = field
         self.total_citations = 0
         self.worked_hours = 0
-        self.days_left = 100
+        self.days_left = 80
 
         start_hour = 15
 
