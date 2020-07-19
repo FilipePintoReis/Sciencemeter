@@ -5,15 +5,15 @@ class Paper:
     def __init__(self, field, owner):
         self.id = 'Title' + str(uuid4())
         self.owner = owner
-        self.authors = [owner]
+        self.authors = []
         self.field = field
         self.total_citations = 0
         self.worked_hours = 0
-        self.days_left = 100
+        self.days_left = 80
 
         start_hour = 15
 
-        self.hour_mapping = {i:start_hour + int(1.6**i) for i in range(1,11)}
+        self.hour_mapping = {i:start_hour + int(1.8**i) for i in range(1,11)}
         self.paper_level = 0
 
         
